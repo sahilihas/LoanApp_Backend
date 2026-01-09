@@ -1,21 +1,31 @@
-import express from "express";
+import express from 'express';
 import {
-  createStepOne,
-  updateStepTwo,
-  updateStepThree,
-  updateStepFour,
-  updateStepFive,
-  getLoanApplication,
-} from "../controllers/loanForm.controller.js";
+  createLoanApplication,
+  getAllApplications,
+  getApplicationById,
+  updateApplicationStatus,
+  deleteApplication,
+  getApplicationStats
+} from '../controllers/loanForm.controller.js';
 
 const router = express.Router();
 
-router.post("/step-1", createStepOne);
-router.put("/step-2/:id", updateStepTwo);
-router.put("/step-3/:id", updateStepThree);
-router.put("/step-4/:id", updateStepFour);
-router.put("/step-5/:id", updateStepFive);
+// GET /api/loan-forms/stats - Get application statistics
+router.get('/stats', getApplicationStats);
 
-router.get("/:id", getLoanApplication);
+// POST /api/loan-forms - Create new loan application
+router.post('/', createLoanApplication);
+
+// GET /api/loan-forms - Get all loan applications
+router.get('/', getAllApplications);
+
+// GET /api/loan-forms/:id - Get single application by ID
+router.get('/:id', getApplicationById);
+
+// PUT /api/loan-forms/:id/status - Update application status
+router.put('/:id/status', updateApplicationStatus);
+
+// DELETE /api/loan-forms/:id - Delete application
+router.delete('/:id', deleteApplication);
 
 export default router;

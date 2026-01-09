@@ -1,15 +1,24 @@
 {
-  "name": "loan-application-websote-backend",
+  "name": "springfield-financial-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend API for Springfield Financial Services Loan Application System",
   "main": "index.js",
-  "scripts": {
-    "start": "nodemon index.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "loan",
+    "application",
+    "financial",
+    "backend",
+    "api",
+    "mongodb"
+  ],
+  "author": "Springfield Financial Services",
+  "license": "ISC",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
@@ -17,5 +26,12 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }

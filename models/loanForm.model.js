@@ -1,251 +1,98 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-const loanFormSchema = new mongoose.Schema(
-  {
-    applicationForm: {
-      fullName: {
-        type: String,
-        required: function () {
-          return this.currentStep >= 1;
-        },
-        trim: true,
-      },
-      email: {
-        type: String,
-        required: function () {
-          return this.currentStep >= 1;
-        },
-        lowercase: true,
-      },
-      phoneNumber: {
-        type: String,
-        required: function () {
-          return this.currentStep >= 1;
-        },
-      },
-      whatsAppNumber: {
-        type: String,
-        required: function () {
-          return this.currentStep >= 1;
-        },
-      },
-      dateOfBirth: {
-        type: Date,
-        required: function () {
-          return this.currentStep >= 1;
-        },
-      },
-      nationality: {
-        type: String,
-        required: function () {
-          return this.currentStep >= 1;
-        },
-      },
-      residentialAddress: {
-        type: String,
-        required: function () {
-          return this.currentStep >= 1;
-        },
-      },
-      idType: {
-        type: String,
-        required: function () {
-          return this.currentStep >= 1;
-        },
-      },
-      idNumber: {
-        type: String,
-        required: function () {
-          return this.currentStep >= 1;
-        },
-      },
-      govtIdIssued: [
-        {
-          type: String,
-          required: function () {
-            return this.currentStep >= 1;
-          },
-        },
-      ],
-    },
-
-    businessInfo: {
-      businessName: {
-        type: String,
-        required: function () {
-          return this.currentStep >= 2;
-        },
-      },
-      businessRegistrationNumber: {
-        type: String,
-        required: function () {
-          return this.currentStep >= 2;
-        },
-      },
-      businessType: {
-        type: String,
-        enum: [
-          "Sole Proprietorship",
-          "Partnership",
-          "Limited Company (ltd.)",
-          "Corporation",
-          "Other",
-        ],
-        required: function () {
-          return this.currentStep >= 2;
-        },
-      },
-      businessAddress: {
-        type: String,
-        required: function () {
-          return this.currentStep >= 2;
-        },
-      },
-      businessSector: {
-        type: String,
-        required: function () {
-          return this.currentStep >= 2;
-        },
-      },
-      businessEstablishmentDate: {
-        type: Date,
-        required: function () {
-          return this.currentStep >= 2;
-        },
-      },
-      taxIdentificationNumber: {
-        type: String,
-        required: function () {
-          return this.currentStep >= 2;
-        },
-      },
-      businessWebsite: { type: String },
-
-      ownerDetails: {
-        ownerName: {
-          type: String,
-          required: function () {
-            return this.currentStep >= 2;
-          },
-        },
-        ownershipPercentage: {
-          type: Number,
-          min: 0,
-          max: 100,
-          required: function () {
-            return this.currentStep >= 2;
-          },
-        },
-      },
-
-      businessRegistrationDocument: [
-        {
-          type: String,
-          required: function () {
-            return this.currentStep >= 2;
-          },
-        },
-      ],
-    },
-
-    loanRequestDetails: {
-      loanAmountInUSD: {
-        type: Number,
-        min: 1,
-        required: function () {
-          return this.currentStep >= 3;
-        },
-      },
-      loanPurpose: {
-        type: String,
-        enum: [
-          "Working Capital",
-          "Equipment Purchase",
-          "Inventory",
-          "Business Expansion",
-          "Real Estate",
-          "Other",
-        ],
-        required: function () {
-          return this.currentStep >= 3;
-        },
-      },
-      repaymentPeriodMonths: {
-        type: Number,
-        enum: [6, 12, 18, 24, 36],
-        required: function () {
-          return this.currentStep >= 3;
-        },
-      },
-      proposedStartDate: {
-        type: Date,
-        required: function () {
-          return this.currentStep >= 3;
-        },
-      },
-    },
-
-    businessFinancialDetails: {
-      annualRevenueUSD: {
-        type: Number,
-        required: function () {
-          return this.currentStep >= 4;
-        },
-      },
-      monthlyExpensesUSD: {
-        type: Number,
-        required: function () {
-          return this.currentStep >= 4;
-        },
-      },
-      monthlyAverageSalesUSD: {
-        type: Number,
-        required: function () {
-          return this.currentStep >= 4;
-        },
-      },
-      existingDebts: {
-        type: String,
-        enum: ["yes", "no"],
-        required: function () {
-          return this.currentStep >= 4;
-        },
-      },
-      bankStatements: [
-        {
-          type: String,
-          required: function () {
-            return this.currentStep >= 4;
-          },
-        },
-      ],
-    },
-
-    documentsUpload: {
-      ownerId: [{ type: String }],
-      digitalSignature: [{ type: String }],
-      preferredContactMethod: {
-        type: String,
-        enum: ["Email", "Phone", "Whatsapp"],
-        required: function () {
-          return this.currentStep >= 5;
-        },
-      },
-      submissionDate: { type: Date, default: Date.now },
-    },
-
-    currentStep: { type: Number, default: 1 },
-    isCompleted: { type: Boolean, default: false },
-
-    status: {
-      type: String,
-      enum: ["draft", "submitted", "under_review", "approved", "rejected"],
-      default: "draft",
-    },
+const loanFormSchema = new mongoose.Schema({
+  // Application ID
+  id: {
+    type: String,
+    required: true,
+    unique: true
   },
-  { timestamps: true }
-);
+  
+  // Applicant Information
+  applicant: {
+    fullName: { type: String, required: true },
+    email: { type: String, required: true },
+    phone: { type: String, required: true },
+    whatsapp: { type: String, required: true },
+    dateOfBirth: { type: String, required: true },
+    nationality: { type: String, required: true },
+    address: { type: String, required: true },
+    idType: { type: String, required: true },
+    idNumber: { type: String, required: true }
+  },
+  
+  // Business Information
+  business: {
+    name: { type: String, required: true },
+    regNumber: { type: String, required: true },
+    entity: { type: String, required: true },
+    industry: { type: String, required: true },
+    address: { type: String, required: true },
+    established: { type: String, required: true },
+    tin: { type: String, required: true },
+    website: { type: String },
+    ownerNames: { type: String, required: true },
+    ownershipPercentage: { type: Number, required: true }
+  },
+  
+  // Loan Details
+  loan: {
+    amount: { type: Number, required: true },
+    purpose: { type: String, required: true },
+    term: { type: Number, required: true },
+    startDate: { type: String, required: true }
+  },
+  
+  // Financial Information
+  financial: {
+    annualRevenue: { type: Number, required: true },
+    monthlySales: { type: Number, required: true },
+    monthlyExpenses: { type: Number, required: true },
+    existingLoans: { type: String, required: true },
+    lenderName: { type: String },
+    outstandingBalance: { type: Number },
+    monthlyRepayment: { type: Number }
+  },
+  
+  // Documents (storing file names/paths)
+  documents: {
+    idDocument: { type: String },
+    businessDocs: [{ type: String }],
+    bankStatements: [{ type: String }],
+    ownerIds: [{ type: String }]
+  },
+  
+  // Consent and Signature
+  consent: {
+    certifyInfo: { type: Boolean, required: true },
+    authorizeVerification: { type: Boolean, required: true },
+    agreeTerms: { type: Boolean, required: true },
+    digitalSignature: { type: String, required: true },
+    preferredContact: { type: String }
+  },
+  
+  // Application Status
+  status: {
+    type: String,
+    enum: ['Pending Review', 'Under Review', 'Approved', 'Rejected'],
+    default: 'Pending Review'
+  },
+  
+  // Timestamps
+  submittedAt: {
+    type: Date,
+    default: Date.now
+  }
+}, {
+  timestamps: true
+});
 
-const LoanForm = mongoose.model("LoanForm", loanFormSchema);
+// Create indexes for better query performance
+loanFormSchema.index({ id: 1 });
+loanFormSchema.index({ status: 1 });
+loanFormSchema.index({ submittedAt: -1 });
+loanFormSchema.index({ 'applicant.email': 1 });
+
+const LoanForm = mongoose.model('LoanForm', loanFormSchema);
 
 export default LoanForm;
