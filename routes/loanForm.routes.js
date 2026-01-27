@@ -7,25 +7,24 @@ import {
   deleteApplication,
   getApplicationStats
 } from '../controllers/loanForm.controller.js';
+import { upload } from '../middlewares/upload.js';
 
 const router = express.Router();
 
-// GET /api/loan-forms/stats - Get application statistics
 router.get('/stats', getApplicationStats);
-
-// POST /api/loan-forms - Create new loan application
-router.post('/', createLoanApplication);
-
-// GET /api/loan-forms - Get all loan applications
+router.post(
+  "/apply",
+  upload.fields([
+    { name: "idDocument", maxCount: 1 },
+    { name: "businessDocs", maxCount: 5 },
+    { name: "bankStatements", maxCount: 5 },
+    { name: "ownerIds", maxCount: 5 },
+  ]),
+  createLoanApplication
+);
 router.get('/', getAllApplications);
-
-// GET /api/loan-forms/:id - Get single application by ID
 router.get('/:id', getApplicationById);
-
-// PUT /api/loan-forms/:id/status - Update application status
 router.put('/:id/status', updateApplicationStatus);
-
-// DELETE /api/loan-forms/:id - Delete application
 router.delete('/:id', deleteApplication);
 
 export default router;

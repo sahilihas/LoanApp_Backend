@@ -1,13 +1,18 @@
-import LoanForm from '../models/loanForm.model.js';
+import LoanForm from "../models/loanForm.model.js";
 
 // CREATE - Submit new loan application
 export const createLoanApplication = async (req, res) => {
   try {
-    console.log('📥 Received application data:', req.body);
-    
+    const files = req.files;
+
+    const getFileUrls = (field) =>
+      files?.[field] ? files[field].map((file) => file.path) : [];
+
+    console.log("📥 Received application data:", req.body);
+
     // Generate unique application ID
-    const applicationId = 'APP-' + Date.now();
-    
+    const applicationId = "APP-" + Date.now();
+
     // Prepare application data
     const applicationData = {
       id: applicationId,
@@ -20,7 +25,7 @@ export const createLoanApplication = async (req, res) => {
         nationality: req.body.nationality,
         address: req.body.address,
         idType: req.body.idType,
-        idNumber: req.body.idNumber
+        idNumber: req.body.idNumber,
       },
       business: {
         name: req.body.businessName,
@@ -30,63 +35,63 @@ export const createLoanApplication = async (req, res) => {
         address: req.body.businessAddress,
         established: req.body.businessEstablished,
         tin: req.body.tin,
-        website: req.body.businessWebsite || '',
+        website: req.body.businessWebsite || "",
         ownerNames: req.body.ownerNames,
-        ownershipPercentage: parseInt(req.body.ownershipPercentage)
+        ownershipPercentage: parseInt(req.body.ownershipPercentage),
       },
       loan: {
         amount: parseFloat(req.body.loanAmount),
         purpose: req.body.loanPurpose,
         term: parseInt(req.body.repaymentTerm),
-        startDate: req.body.proposedStartDate
+        startDate: req.body.proposedStartDate,
       },
       financial: {
         annualRevenue: parseFloat(req.body.annualRevenue),
         monthlySales: parseFloat(req.body.monthlySales),
         monthlyExpenses: parseFloat(req.body.monthlyExpenses),
         existingLoans: req.body.existingLoans,
-        lenderName: req.body.lenderName || '',
+        lenderName: req.body.lenderName || "",
         outstandingBalance: parseFloat(req.body.outstandingBalance) || 0,
-        monthlyRepayment: parseFloat(req.body.monthlyRepayment) || 0
+        monthlyRepayment: parseFloat(req.body.monthlyRepayment) || 0,
       },
       documents: {
-        idDocument: req.body.idDocument || 'uploaded',
-        businessDocs: req.body.businessDocs ? 
-          (Array.isArray(req.body.businessDocs) ? req.body.businessDocs : [req.body.businessDocs]) : [],
-        bankStatements: req.body.bankStatements ? 
-          (Array.isArray(req.body.bankStatements) ? req.body.bankStatements : [req.body.bankStatements]) : [],
-        ownerIds: req.body.ownerIds ? 
-          (Array.isArray(req.body.ownerIds) ? req.body.ownerIds : [req.body.ownerIds]) : []
+        idDocument: files?.idDocument?.[0]?.path || "",
+        businessDocs: getFileUrls("businessDocs"),
+        bankStatements: getFileUrls("bankStatements"),
+        ownerIds: getFileUrls("ownerIds"),
       },
       consent: {
-        certifyInfo: req.body.certifyInfo === 'on' || req.body.certifyInfo === true,
-        authorizeVerification: req.body.authorizeVerification === 'on' || req.body.authorizeVerification === true,
-        agreeTerms: req.body.agreeTerms === 'on' || req.body.agreeTerms === true,
+        certifyInfo:
+          req.body.certifyInfo === "on" || req.body.certifyInfo === true,
+        authorizeVerification:
+          req.body.authorizeVerification === "on" ||
+          req.body.authorizeVerification === true,
+        agreeTerms:
+          req.body.agreeTerms === "on" || req.body.agreeTerms === true,
         digitalSignature: req.body.digitalSignature,
-        preferredContact: req.body.preferredContact || 'email'
+        preferredContact: req.body.preferredContact || "email",
       },
-      status: 'Pending Review'
+      status: "Pending Review",
     };
 
     // Create and save the application
     const newApplication = new LoanForm(applicationData);
     await newApplication.save();
 
-    console.log('✅ Application saved successfully:', applicationId);
+    console.log("✅ Application saved successfully:", applicationId);
 
     res.status(201).json({
       success: true,
-      message: 'Application submitted successfully!',
+      message: "Application submitted successfully!",
       applicationId: applicationId,
-      data: newApplication
+      data: newApplication,
     });
-
   } catch (error) {
-    console.error('❌ Error submitting application:', error);
+    console.error("❌ Error submitting application:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to submit application',
-      error: error.message
+      message: "Failed to submit application",
+      error: error.message,
     });
   }
 };
@@ -95,19 +100,19 @@ export const createLoanApplication = async (req, res) => {
 export const getAllApplications = async (req, res) => {
   try {
     const { status, page = 1, limit = 100 } = req.query;
-    
+
     const query = {};
     if (status) {
       query.status = status;
     }
-    
+
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
+
     const applications = await LoanForm.find(query)
       .sort({ submittedAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
-    
+
     const totalCount = await LoanForm.countDocuments(query);
 
     console.log(`📊 Fetched ${applications.length} applications`);
@@ -118,15 +123,14 @@ export const getAllApplications = async (req, res) => {
       totalCount: totalCount,
       page: parseInt(page),
       totalPages: Math.ceil(totalCount / parseInt(limit)),
-      data: applications
+      data: applications,
     });
-
   } catch (error) {
-    console.error('❌ Error fetching applications:', error);
+    console.error("❌ Error fetching applications:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch applications',
-      error: error.message
+      message: "Failed to fetch applications",
+      error: error.message,
     });
   }
 };
@@ -139,7 +143,7 @@ export const getApplicationById = async (req, res) => {
     if (!application) {
       return res.status(404).json({
         success: false,
-        message: 'Application not found'
+        message: "Application not found",
       });
     }
 
@@ -147,15 +151,14 @@ export const getApplicationById = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: application
+      data: application,
     });
-
   } catch (error) {
-    console.error('❌ Error fetching application:', error);
+    console.error("❌ Error fetching application:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch application',
-      error: error.message
+      message: "Failed to fetch application",
+      error: error.message,
     });
   }
 };
@@ -164,25 +167,30 @@ export const getApplicationById = async (req, res) => {
 export const updateApplicationStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    
-    const validStatuses = ['Pending Review', 'Under Review', 'Approved', 'Rejected'];
+
+    const validStatuses = [
+      "Pending Review",
+      "Under Review",
+      "Approved",
+      "Rejected",
+    ];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid status value'
+        message: "Invalid status value",
       });
     }
-    
+
     const application = await LoanForm.findOneAndUpdate(
       { id: req.params.id },
       { status: status },
-      { new: true }
+      { new: true },
     );
 
     if (!application) {
       return res.status(404).json({
         success: false,
-        message: 'Application not found'
+        message: "Application not found",
       });
     }
 
@@ -190,16 +198,15 @@ export const updateApplicationStatus = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Status updated successfully',
-      data: application
+      message: "Status updated successfully",
+      data: application,
     });
-
   } catch (error) {
-    console.error('❌ Error updating status:', error);
+    console.error("❌ Error updating status:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update status',
-      error: error.message
+      message: "Failed to update status",
+      error: error.message,
     });
   }
 };
@@ -212,7 +219,7 @@ export const deleteApplication = async (req, res) => {
     if (!application) {
       return res.status(404).json({
         success: false,
-        message: 'Application not found'
+        message: "Application not found",
       });
     }
 
@@ -220,15 +227,14 @@ export const deleteApplication = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Application deleted successfully'
+      message: "Application deleted successfully",
     });
-
   } catch (error) {
-    console.error('❌ Error deleting application:', error);
+    console.error("❌ Error deleting application:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete application',
-      error: error.message
+      message: "Failed to delete application",
+      error: error.message,
     });
   }
 };
@@ -237,24 +243,34 @@ export const deleteApplication = async (req, res) => {
 export const getApplicationStats = async (req, res) => {
   try {
     const totalApplications = await LoanForm.countDocuments();
-    const pendingApplications = await LoanForm.countDocuments({ status: 'Pending Review' });
-    const approvedApplications = await LoanForm.countDocuments({ status: 'Approved' });
-    const rejectedApplications = await LoanForm.countDocuments({ status: 'Rejected' });
-    const underReviewApplications = await LoanForm.countDocuments({ status: 'Under Review' });
-    
+    const pendingApplications = await LoanForm.countDocuments({
+      status: "Pending Review",
+    });
+    const approvedApplications = await LoanForm.countDocuments({
+      status: "Approved",
+    });
+    const rejectedApplications = await LoanForm.countDocuments({
+      status: "Rejected",
+    });
+    const underReviewApplications = await LoanForm.countDocuments({
+      status: "Under Review",
+    });
+
     const loanAmountAgg = await LoanForm.aggregate([
       {
         $group: {
           _id: null,
-          totalAmount: { $sum: '$loan.amount' },
-          averageAmount: { $avg: '$loan.amount' }
-        }
-      }
+          totalAmount: { $sum: "$loan.amount" },
+          averageAmount: { $avg: "$loan.amount" },
+        },
+      },
     ]);
-    
-    const totalLoanAmount = loanAmountAgg.length > 0 ? loanAmountAgg[0].totalAmount : 0;
-    const averageLoanAmount = loanAmountAgg.length > 0 ? loanAmountAgg[0].averageAmount : 0;
-    
+
+    const totalLoanAmount =
+      loanAmountAgg.length > 0 ? loanAmountAgg[0].totalAmount : 0;
+    const averageLoanAmount =
+      loanAmountAgg.length > 0 ? loanAmountAgg[0].averageAmount : 0;
+
     res.status(200).json({
       success: true,
       data: {
@@ -265,16 +281,18 @@ export const getApplicationStats = async (req, res) => {
         underReviewApplications,
         totalLoanAmount,
         averageLoanAmount,
-        approvalRate: totalApplications > 0 ? ((approvedApplications / totalApplications) * 100).toFixed(2) : 0
-      }
+        approvalRate:
+          totalApplications > 0
+            ? ((approvedApplications / totalApplications) * 100).toFixed(2)
+            : 0,
+      },
     });
-
   } catch (error) {
-    console.error('❌ Error fetching statistics:', error);
+    console.error("❌ Error fetching statistics:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch statistics',
-      error: error.message
+      message: "Failed to fetch statistics",
+      error: error.message,
     });
   }
 };
