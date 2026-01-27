@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.get('/stats', getApplicationStats);
 router.post(
-  "/apply",
+  "/",
   upload.fields([
     { name: "idDocument", maxCount: 1 },
     { name: "businessDocs", maxCount: 5 },
